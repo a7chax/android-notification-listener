@@ -17,6 +17,8 @@ build/
 .cxx/
 local.properties
 *.apk
+# Publish only the verified debug APK for the notification demo.
+!/artifacts/notification-bridge-debug.apk
 *.aab
 *.dex
 *.class

@@ -18,6 +18,7 @@ APP = "dev.local.notificationbridge"
 COMPONENT = APP + "/.NotificationBridge"
 ROOT = Path(__file__).resolve().parent
 APK = ROOT / "build" / "notification-bridge.apk"
+BUNDLED_APK = ROOT / "artifacts" / "notification-bridge-debug.apk"
 
 
 class BridgeError(RuntimeError):
@@ -121,11 +122,13 @@ def log(message):
 
 
 def setup(adb, rebuild=False):
-    if rebuild or not APK.exists():
+    apk = BUNDLED_APK if not rebuild and BUNDLED_APK.is_file() else APK
+    if rebuild or not apk.exists():
         result = subprocess.run([sys.executable, str(ROOT / "build_android.py")])
         if result.returncode:
             raise BridgeError("APK build failed. See the build output above.")
-    log(adb.run("install", "-r", str(APK), timeout=90).strip())
+        apk = APK
+    log(adb.run("install", "-r", str(apk), timeout=90).strip())
     sdk = int(adb.run("shell", "getprop", "ro.build.version.sdk").strip())
     manual_access = sdk < 27
     if not manual_access:

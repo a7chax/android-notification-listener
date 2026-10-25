@@ -4,6 +4,7 @@ Read Android notifications on your computer through ADB.
 The listener receives notifications from **all apps** by default.
 It records new notifications, updates, and removals.
 It can read text from custom notification views, including some live activities.
+A ready-to-install debug APK and a live notification demo are included.
 
 ## App examples
 
@@ -45,7 +46,9 @@ These are possible uses. This project supplies the event stream.
 
 - An Android 8 or later phone with USB debugging enabled.
 - ADB, Python 3.10 or later, and `uv` on your computer.
-- A JDK and Android SDK tools to build the Android app.
+
+The included APK does not need build tools.
+Source builds need a JDK and Android SDK tools.
 
 Python uses no external packages.
 The Android app has no internet permission.
@@ -83,7 +86,7 @@ The Android app has no internet permission.
    uv run listener.py setup
    ```
 
-   This command builds the APK and installs it on your phone.
+   This command installs the included [Notification Bridge APK](artifacts/notification-bridge-debug.apk).
    It also requests notification access.
    If Android opens the access settings, enable **Notification Bridge**.
 
@@ -98,6 +101,27 @@ The Android app has no internet permission.
    You do not need scrcpy or an open notification panel.
 
 5. Press **Ctrl-C** to stop the listener.
+
+## Run the simulation
+
+1. Start the listener in one terminal.
+
+   ```bash
+   uv run listener.py listen --package dev.local.notificationbridge --format text
+   ```
+
+2. Open another terminal in the project directory.
+
+3. Start the demo.
+
+   ```bash
+   uv run listener.py demo
+   ```
+
+The demo uses fictional ride status and progress.
+It posts one notification, changes it twice, and removes it after nine seconds.
+The listener prints `posted`, `updated`, `updated`, and `removed` events.
+An Android phone or emulator is required.
 
 ## Save JSON events
 
@@ -132,6 +156,7 @@ ADB copies this data to your computer.
 Package filters limit computer output. They do not limit phone storage.
 
 The Git ignore rules exclude captures, screenshots, local settings, and signing keys.
+Only the verified debug APK is included from the build output.
 Sample notification content and device identifiers are fictional.
 
 ## More information

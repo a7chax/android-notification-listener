@@ -103,6 +103,35 @@ class OutputTests(unittest.TestCase):
 
 class AdbTests(unittest.TestCase):
     @patch("listener.log")
+    @patch("listener.subprocess.run")
+    @patch("listener.APK")
+    @patch("listener.BUNDLED_APK", create=True)
+    def test_setup_installs_bundled_apk_without_build_tools(self, bundled, built, run, log):
+        bundled.is_file.return_value = True
+        bundled.exists.return_value = True
+        bundled.__str__.return_value = "/example/artifacts/notification-bridge-debug.apk"
+        adb = Mock(serial="phone")
+        adb.run.side_effect = lambda *args, **kwargs: "36\n" if "getprop" in args else "Success"
+        adb.read_state.return_value = state()
+        listener.setup(adb)
+        adb.run.assert_any_call("install", "-r", str(bundled), timeout=90)
+        run.assert_not_called()
+
+    @patch("listener.log")
+    @patch("listener.subprocess.run")
+    @patch("listener.APK")
+    @patch("listener.BUNDLED_APK", create=True)
+    def test_rebuild_uses_source_build_even_when_bundled_apk_exists(self, bundled, built, run, log):
+        bundled.is_file.return_value = True
+        run.return_value = subprocess.CompletedProcess([], 0)
+        adb = Mock(serial="phone")
+        adb.run.side_effect = lambda *args, **kwargs: "36\n" if "getprop" in args else "Success"
+        adb.read_state.return_value = state()
+        listener.setup(adb, rebuild=True)
+        run.assert_called_once()
+        adb.run.assert_any_call("install", "-r", str(built), timeout=90)
+
+    @patch("listener.log")
     @patch("listener.APK")
     def test_android_8_setup_opens_settings_instead_of_unsupported_shell_grant(self, apk, log):
         adb = Mock(serial="phone")

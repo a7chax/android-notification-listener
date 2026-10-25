@@ -1,5 +1,21 @@
 # Build and test
 
+## Use the included APK
+
+The ready-to-install APK is `artifacts/notification-bridge-debug.apk`.
+It includes the notification listener and the simulated live notification.
+`setup` selects this APK by default.
+
+```bash
+uv run listener.py setup
+```
+
+To check the file checksum, run this command from the project directory:
+
+```bash
+sha256sum -c artifacts/SHA256SUMS
+```
+
 ## Prepare the build tools
 
 1. Install a JDK. JDK 17 or later is recommended.
@@ -31,6 +47,30 @@ To build and install an update, use this command:
 ```bash
 uv run listener.py setup --rebuild
 ```
+
+This command uses the source build instead of the included APK.
+A new signing key cannot update an app signed with another key.
+If Android rejects the update, remove the existing debug app before installation.
+
+## Update the included APK
+
+1. Build the source with `uv run build_android.py`.
+
+2. Copy the verified APK.
+
+   ```bash
+   cp build/notification-bridge.apk artifacts/notification-bridge-debug.apk
+   ```
+
+3. Update the checksum.
+
+   ```bash
+   sha256sum artifacts/notification-bridge-debug.apk > artifacts/SHA256SUMS
+   ```
+
+4. Test the included APK before publication.
+
+Keep the signing key and runtime notification data outside Git.
 
 ## Run unit tests
 
