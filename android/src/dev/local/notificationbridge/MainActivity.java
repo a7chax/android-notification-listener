@@ -60,7 +60,7 @@ public class MainActivity extends Activity {
     }
 
     private void postDemo(String status, int progress) {
-        // Deliberately omit EXTRA_TITLE and EXTRA_TEXT, just like Gojek's custom view.
+        // Deliberately omit standard text fields to test custom-view extraction.
         RemoteViews view = new RemoteViews(getPackageName(), R.layout.live_demo);
         view.setTextViewText(R.id.demo_title, "Live activity test");
         view.setTextViewText(R.id.demo_status, status);

@@ -5,6 +5,33 @@ The listener receives notifications from **all apps** by default.
 It records new notifications, updates, and removals.
 It can read text from custom notification views, including some live activities.
 
+## App examples
+
+The following apps are examples to try.
+Only Gojek custom-view text extraction was verified during development.
+Other apps need a test on your phone.
+
+| Example apps | Notification data to look for |
+| --- | --- |
+| Gojek | Food delivery status and live activity text |
+| Grab, Uber | Ride status, driver arrival, and trip updates |
+| Google Maps | Navigation instructions and arrival estimates |
+| WhatsApp, Telegram | Message previews and conversation updates |
+| Spotify, YouTube Music | Track titles and playback information |
+| Chrome and download apps | Download status and progress |
+| Clock and timer apps | Timer alerts and ongoing status |
+
+The listener reads the notification content that Android supplies.
+Available fields depend on the app, Android version, and privacy settings.
+An app must post a notification change for the listener to record an update.
+
+For example, a delivery app can update one notification as an order progresses.
+The listener connects these updates through the same notification key.
+It does not read the app's private database or control the order.
+
+Android supports ongoing status for rides, deliveries, and navigation.
+See [Android live update notifications](https://developer.android.com/develop/ui/views/notifications/live-update).
+
 ## Possible uses
 
 - Record notification changes for app tests.
@@ -105,7 +132,7 @@ ADB copies this data to your computer.
 Package filters limit computer output. They do not limit phone storage.
 
 The Git ignore rules exclude captures, screenshots, local settings, and signing keys.
-All examples in the documentation are fictional.
+Sample notification content and device identifiers are fictional.
 
 ## More information
 

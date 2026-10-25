@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 import listener
 
 
-def notification(key="order", package="com.gojek.app", text="Driver arriving"):
+def notification(key="order", package="com.example.delivery", text="Driver arriving"):
     return {"key": key, "package": package, "id": 7, "title": None,
             "text": None, "view_text": [text], "progress": {"value": 40, "max": 100}}
 
@@ -77,8 +77,8 @@ class CursorTests(unittest.TestCase):
 class OutputTests(unittest.TestCase):
     def test_exact_package_filter_and_all_apps(self):
         record = notification()
-        self.assertTrue(listener.matches(record, ["com.gojek.app"]))
-        self.assertFalse(listener.matches(record, ["com.gojek"]))
+        self.assertTrue(listener.matches(record, ["com.example.delivery"]))
+        self.assertFalse(listener.matches(record, ["com.example"]))
         self.assertTrue(listener.matches(record, ["*"]))
 
     def test_json_is_one_line_and_preserves_unicode(self):
@@ -91,7 +91,7 @@ class OutputTests(unittest.TestCase):
     def test_text_contains_custom_view_status_and_lifecycle(self):
         formatted = listener.format_event(event(2, "updated"), "text")
         self.assertIn("UPDATED", formatted)
-        self.assertIn("com.gojek.app", formatted)
+        self.assertIn("com.example.delivery", formatted)
         self.assertIn("Driver arriving", formatted)
         self.assertIn("40/100", formatted)
 
@@ -175,7 +175,7 @@ class StreamTests(unittest.TestCase):
         adb = Mock()
         adb.read_state.side_effect = [state(), listener.BridgeError("USB offline"),
             state(2, [event(1, "posted"), event(2, "updated")], [notification()]), KeyboardInterrupt]
-        args = SimpleNamespace(duration=None, command="listen", package=["com.gojek.app"],
+        args = SimpleNamespace(duration=None, command="listen", package=["com.example.delivery"],
                                format="json", interval=0.5)
         output = io.StringIO()
         with self.assertRaises(KeyboardInterrupt):
@@ -204,8 +204,8 @@ class CliTests(unittest.TestCase):
     @patch("listener.log")
     @patch("listener.Adb")
     def test_snapshot_defaults_to_all_apps_in_json_and_text(self, adb_class, log):
-        records = [notification(package="com.gojek.app"),
-                   notification(key="chat", package="com.whatsapp"),
+        records = [notification(package="com.example.delivery"),
+                   notification(key="chat", package="com.example.chat"),
                    notification(key="usb", package="android")]
         records[1].update(title="Chat", text="New message", view_text=[])
         adb_class.return_value.read_state.return_value = state(active=records)
@@ -226,7 +226,7 @@ class CliTests(unittest.TestCase):
     @patch("listener.log")
     @patch("listener.Adb")
     def test_default_live_stream_includes_other_apps_and_their_updates(self, adb_class, log, sleep):
-        chat = notification(key="chat", package="com.whatsapp")
+        chat = notification(key="chat", package="com.example.chat")
         events = [event(1, "posted", chat), event(2, "updated", chat),
                   event(3, "removed", chat), event(4, "posted", notification())]
         adb_class.return_value.read_state.side_effect = [state(), state(4, events), KeyboardInterrupt]
@@ -235,17 +235,17 @@ class CliTests(unittest.TestCase):
             result = [json.loads(line) for line in output.getvalue().splitlines()]
         self.assertEqual([e["event"] for e in result], [e["event"] for e in events])
         self.assertEqual({e["notification"]["package"] for e in result},
-                         {"com.whatsapp", "com.gojek.app"})
+                         {"com.example.chat", "com.example.delivery"})
 
     @patch("listener.log")
     @patch("listener.Adb")
     def test_explicit_package_filter_still_limits_output(self, adb_class, log):
         adb_class.return_value.read_state.return_value = state(active=[
-            notification(), notification(key="chat", package="com.whatsapp")])
+            notification(), notification(key="chat", package="com.example.chat")])
         with patch("listener.sys.stdout", new_callable=io.StringIO) as output:
-            self.assertEqual(listener.main(["snapshot", "--package", "com.whatsapp"]), 0)
+            self.assertEqual(listener.main(["snapshot", "--package", "com.example.chat"]), 0)
             events = [json.loads(line) for line in output.getvalue().splitlines()]
-        self.assertEqual([e["notification"]["package"] for e in events], ["com.whatsapp"])
+        self.assertEqual([e["notification"]["package"] for e in events], ["com.example.chat"])
 
 
 if __name__ == "__main__":

@@ -20,10 +20,6 @@ def main():
     adb.select_device()
     state = adb.read_state()
     assert state["connected"], "Notification listener is disconnected"
-    gojek = [n for n in state["active"] if n["package"] == "com.gojek.app" and n["custom_view"]]
-    for n in gojek:
-        assert n["view_text"], f"Gojek custom view extraction failed: {n['extraction_errors']}"
-        assert not n["extraction_errors"], n["extraction_errors"]
     command = [sys.executable, str(listener.ROOT / "listener.py"), "listen",
                "--serial", adb.serial, "--duration", "13"]
     with tempfile.TemporaryFile(mode="w+") as diagnostics:
@@ -63,7 +59,7 @@ def main():
         assert matched[0]["notification"]["title"] is None
         assert matched[0]["notification"]["text"] is None
         assert not matched[0]["notification"]["extraction_errors"]
-    print(json.dumps({"device": adb.serial, "gojek_custom_views_verified": len(gojek),
+    print(json.dumps({"device": adb.serial,
                       "default_stream_app_count": len(packages),
                       "demo_lifecycle": kinds, "same_notification_key": True,
                       "background_updates": True, "custom_text_and_progress": "verified"}, indent=2))

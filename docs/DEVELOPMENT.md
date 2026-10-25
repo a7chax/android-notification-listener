@@ -69,8 +69,7 @@ uv run tests/device_smoke.py
 This test needs an existing notification to confirm the initial read.
 It opens the test app and then moves it to the background.
 It checks custom text, progress, updates, and removal.
-It also checks a Gojek custom view if one exists.
-Gojek is one test case. The listener supports all apps.
+The test has no dependency on a delivery app or another third-party app.
 
 ## Main files
 
@@ -81,8 +80,7 @@ Gojek is one test case. The listener supports all apps.
 | `android/src/.../NotificationBridge.java` | Receive Android notification events and extract content. |
 | `android/src/.../MainActivity.java` | Show access settings and create test notifications. |
 | `tests/` | Check computer behavior and connected-device behavior. |
-| `gojek.sh` | Start the listener through a legacy shell shortcut. |
-| `scripts/capture.sh` | Make legacy diagnostic captures. |
+| `listen.sh` | Start the listener through a generic shell shortcut. |
 
 The Android app has no internet permission.
 Its debug mode lets authorized ADB connections read its private state with `run-as`.
