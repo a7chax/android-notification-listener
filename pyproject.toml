@@ -1,0 +1,9 @@
+[project]
+name = "android-notification-listener"
+version = "0.1.0"
+description = "Live Android notification events and custom-view text over ADB"
+requires-python = ">=3.10"
+dependencies = []
+
+[tool.uv]
+package = false

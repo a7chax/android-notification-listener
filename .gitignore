@@ -1,0 +1,63 @@
+# Python environments and caches.
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+*.egg-info/
+dist/
+
+# Android build output and local SDK settings.
+build/
+.gradle/
+.cxx/
+local.properties
+*.apk
+*.aab
+*.dex
+*.class
+
+# Signing keys, credentials, and local configuration.
+*.keystore
+*.jks
+*.key
+*.pem
+*.p12
+*.pfx
+.env
+.env.*
+.aws/
+.ssh/
+.codex/
+.agents/
+credentials.json
+secrets.json
+
+# Notification content and device captures can contain personal data.
+*.jsonl
+*.ndjson
+*.log
+output/
+captures/
+screenshots/
+.local-data/
+/data/
+/notifications*.txt
+/gojek*.txt
+/window*.xml
+/screenshot*
+/gojek-notification/
+
+# Local session notes and editor files.
+/docs/superpowers/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
