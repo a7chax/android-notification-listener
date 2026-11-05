@@ -2,12 +2,17 @@ package dev.local.notificationbridge;
 
 import android.app.Notification;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
 import android.util.Log;
+import android.util.Base64;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -17,6 +22,7 @@ import android.widget.TextView;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -29,7 +35,11 @@ import java.util.UUID;
 
 /** Local-only notification lifecycle journal, read by the desktop via adb run-as. */
 public class NotificationBridge extends NotificationListenerService {
+    private static final int MAX_APPS = 128;
+    private static final int ICON_SIZE = 64;
+    private static final int MAX_ICON_BYTES = 64 * 1024;
     private final Map<String, JSONObject> active = new LinkedHashMap<>();
+    private final Map<String, JSONObject> apps = new LinkedHashMap<>();
     private final ArrayDeque<JSONObject> events = new ArrayDeque<>();
     private final Handler handler = new Handler(Looper.getMainLooper());
     private String session = UUID.randomUUID().toString();
@@ -52,6 +62,7 @@ public class NotificationBridge extends NotificationListenerService {
         sequence = 0;
         events.clear();
         active.clear();
+        apps.clear();
         StatusBarNotification[] notifications = getActiveNotifications();
         if (notifications != null) {
             for (StatusBarNotification sbn : notifications) active.put(sbn.getKey(), extract(sbn));
@@ -115,6 +126,7 @@ public class NotificationBridge extends NotificationListenerService {
             state.put("heartbeat", System.currentTimeMillis());
             state.put("active", new JSONArray(active.values()));
             state.put("events", new JSONArray(events));
+            state.put("apps", new JSONObject(apps));
             // Older framework AtomicFile versions expose a partly written base file
             // to raw readers. Close a sibling file before its atomic Linux rename.
             try (FileOutputStream output = new FileOutputStream(temporary)) {
@@ -131,7 +143,39 @@ public class NotificationBridge extends NotificationListenerService {
         out.put(key, value == null ? JSONObject.NULL : value.toString());
     }
 
+    private void rememberApp(String packageName) {
+        if (apps.containsKey(packageName) || apps.size() >= MAX_APPS) return;
+        String label = packageName;
+        String icon = null;
+        PackageManager manager = getPackageManager();
+        try {
+            CharSequence name = manager.getApplicationLabel(manager.getApplicationInfo(packageName, 0));
+            if (name != null && name.length() > 0) label = name.toString();
+        } catch (Exception ignored) { }
+        Bitmap bitmap = null;
+        try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+            Drawable drawable = manager.getApplicationIcon(packageName);
+            bitmap = Bitmap.createBitmap(ICON_SIZE, ICON_SIZE, Bitmap.Config.ARGB_8888);
+            drawable.setBounds(0, 0, ICON_SIZE, ICON_SIZE);
+            drawable.draw(new Canvas(bitmap));
+            if (bitmap.compress(Bitmap.CompressFormat.PNG, 100, output) && output.size() <= MAX_ICON_BYTES) {
+                icon = "data:image/png;base64," + Base64.encodeToString(output.toByteArray(), Base64.NO_WRAP);
+            }
+        } catch (Exception ignored) {
+            // App identity is optional; unavailable resources must not stop extraction.
+        } finally {
+            if (bitmap != null) bitmap.recycle();
+        }
+        try {
+            JSONObject app = new JSONObject();
+            app.put("label", label.length() > 256 ? label.substring(0, 256) : label);
+            app.put("icon", icon == null ? JSONObject.NULL : icon);
+            apps.put(packageName, app);
+        } catch (JSONException ignored) { }
+    }
+
     private JSONObject extract(StatusBarNotification sbn) {
+        rememberApp(sbn.getPackageName());
         JSONObject out = new JSONObject();
         try {
             Notification n = sbn.getNotification();

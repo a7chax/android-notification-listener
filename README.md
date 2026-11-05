@@ -8,18 +8,19 @@ A ready-to-install debug APK and a live notification demo are included.
 
 ## App examples
 
-The following apps are examples to try.
-Only Gojek custom-view text extraction was verified during development.
-Other apps need a test on your phone.
+The examples below show notification types from different app categories.
+Notification Bridge's built-in demo verifies notification lifecycle events,
+custom-view text, and progress. Test third-party apps on your phone to check
+which fields Android makes available.
 
-| Example apps | Notification data to look for |
+| App category | Notification data to look for |
 | --- | --- |
-| Gojek | Food delivery status and live activity text |
-| Grab, Uber | Ride status, driver arrival, and trip updates |
-| Google Maps | Navigation instructions and arrival estimates |
-| WhatsApp, Telegram | Message previews and conversation updates |
-| Spotify, YouTube Music | Track titles and playback information |
-| Chrome and download apps | Download status and progress |
+| Delivery apps | Order status and live activity text |
+| Ride apps | Driver arrival and trip updates |
+| Navigation apps | Directions and arrival estimates |
+| Messaging apps | Message previews and conversation updates |
+| Music and video apps | Track titles and playback information |
+| Browsers and download apps | Download status and progress |
 | Clock and timer apps | Timer alerts and ongoing status |
 
 The listener reads the notification content that Android supplies.
@@ -147,6 +148,22 @@ For one capture that stops automatically, use this command:
 ```bash
 uv run listener.py snapshot --output notifications.jsonl
 ```
+
+## Open the notification website
+
+With Notification Bridge set up on your phone, start the local inbox:
+
+```bash
+uv run website/server.py
+```
+
+Open **http://127.0.0.1:8765**. The website lists live notifications with
+app names and icons from Android, search, app filters, and a timeline for
+updates and removals. It works with notifications from all apps. It saves
+received history in this browser's local storage and restores it on refresh.
+Keep the page open to collect history. Removed notifications remain saved.
+
+See [website setup and storage limits](website/README.md) for details.
 
 ## Protect your data
 
