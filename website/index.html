@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f9f8f6">
+  <title>Notification Bridge · Inbox</title>
+  <link rel="stylesheet" href="styles.css">
+  <script type="module" src="app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to notifications</a>
+  <div class="app-shell">
+    <header class="sidebar" aria-label="Inbox navigation">
+      <div class="topbar-content">
+        <a class="brand" href="./" aria-label="Notification Bridge home">
+          <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 32 32" fill="none"><path d="M8 24V12a8 8 0 0 1 16 0v12M4 24h24M13 28h6M12 12v8m8-8v8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></span>
+          <span>Notification Bridge</span>
+        </a>
+        <nav class="collection-nav" aria-label="Notification views">
+          <button class="nav-item is-active" id="all-view" aria-pressed="true">All notifications <span class="nav-count" id="all-count">0</span></button>
+          <button class="nav-item" id="removed-view" aria-pressed="false">Removed <span class="nav-count" id="removed-count">0</span></button>
+        </nav>
+        <details class="help">
+          <summary>Setup &amp; history</summary>
+          <div class="help-content">
+            <p>Keep this page open to collect events. History is saved in this browser profile at this address. Changing the port or clearing browser data can make it unavailable. Changes while the page is closed may be missing.</p>
+            <p>Connect your Android phone over USB with ADB enabled, then run <code>python3 listener.py setup</code>. Use <code>python3 listener.py doctor</code> to check the bridge.</p>
+            <p>Start the local server with <code>python3 website/server.py</code>.</p>
+          </div>
+        </details>
+      </div>
+    </header>
+    <main class="main" id="main-content" tabindex="-1">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">YOUR ANDROID NOTIFICATIONS</p>
+          <h1>Your notification <em>inbox.</em></h1>
+          <p class="intro">Live notifications, every update, and history saved in your browser.</p>
+        </div>
+        <button class="button secondary" id="export-button"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 3v9m-3-3 3 3 3-3M4 13v4h12v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Export history</button>
+      </header>
+      <section class="connection-bar" data-testid="connection-status" aria-label="Connection status">
+        <div class="connection-main"><span class="status-dot" id="connection-dot" aria-hidden="true"></span><strong id="phone-status" aria-live="polite" aria-atomic="true">Waiting for connection</strong><span class="connection-divider" aria-hidden="true"></span><span id="server-status">Connecting to local server…</span></div>
+        <p id="phone-message">Saved history is available while the bridge connects.</p>
+      </section>
+      <div id="gap-notice" class="notice" role="status" hidden>Some intermediate changes may be missing after a reconnect or listener restart. Your saved history is retained; current phone state is shown when available.</div>
+      <section class="storage-bar" data-testid="storage-status" aria-label="History storage" aria-live="polite">
+        <div><svg class="save-icon" viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="m5 10 3 3 7-7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span id="storage-message">Restoring browser history…</span></div>
+        <div class="storage-actions"><button id="retry-save" class="text-button" hidden>Retry save</button><button id="clear-history" class="text-button muted">Clear history</button></div>
+      </section>
+      <section class="inbox" aria-label="Notification history">
+        <div class="toolbar">
+          <label class="search-wrap" for="search-input"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="1.5"/><path d="m13 13 4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg><input id="search-input" type="search" placeholder="Search notifications…" autocomplete="off" aria-label="Search all retained notification history"><kbd aria-hidden="true">/</kbd></label>
+          <label class="package-select" for="package-filter"><span class="sr-only">Filter by app package</span><select id="package-filter"><option value="">All apps</option></select></label>
+        </div>
+        <div class="list-heading"><h2 id="collection-title">All notifications</h2><span id="result-count">0 notifications</span></div>
+        <div class="inbox-columns">
+          <div class="notification-list" id="notification-list" role="region" tabindex="0" aria-label="Notifications, scroll to browse history"></div>
+          <section class="notification-detail" id="notification-detail" data-testid="notification-detail" tabindex="0" aria-label="Notification timeline, scroll to browse updates"></section>
+        </div>
+      </section>
+      <footer class="page-footer"><span>Notification Bridge</span><span>Keep this tab open to collect updates.</span></footer>
+    </main>
+  </div>
+  <div class="sr-only" id="announcement" aria-live="polite"></div>
+</body>
+</html>

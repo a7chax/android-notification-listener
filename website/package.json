@@ -1,0 +1,8 @@
+{
+  "name": "notification-bridge-website",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node history.test.mjs"
+  }
+}
